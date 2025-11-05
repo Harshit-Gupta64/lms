@@ -2,6 +2,7 @@ import { createContext, useEffect, useState } from "react";  // createContext is
 import { dummyCourses } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
 import humanizeDuration from 'humanize-duration';
+import {useAuth,useUser} from '@clerk/clerk-react';
 
 
 export const AppContext=createContext() //This context will be used to store and provide shared data (like global state or settings) to components that need it.
@@ -17,6 +18,8 @@ export const AppContextProvider=(props)=>{ //This is like a wrapper around parts
 
     const navigate=useNavigate()
 
+    const {getToken}=useAuth()
+    const {user}=useUser()
 
     //fetch all courses
     const fetchAllCourses=async()=>{
@@ -70,6 +73,15 @@ export const AppContextProvider=(props)=>{ //This is like a wrapper around parts
     useEffect(()=>{
         fetchAllCourses()
         fetchUserEnrolledCourses()
+    },[])
+
+    const logToken=async()=>{
+        console.log(await getToken())
+    }
+
+    useEffect(()=>{
+        if(user){}
+        logToken()
     },[])
 
     const value={
