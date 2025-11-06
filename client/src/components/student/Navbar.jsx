@@ -3,15 +3,45 @@ import { assets } from '../../assets/assets'
 import {Link,useLocation} from 'react-router-dom'
 import { useClerk,UserButton,useUser } from '@clerk/clerk-react'
 import { AppContext } from '../../context/AppContext'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 function Navbar() {
 
     const location=useLocation()
     const isCourseListPage=location.pathname.includes('/course-list')//this is done to change the bg color based oon the loaction
-    const {navigate,isEducator}=useContext(AppContext)
+    const {navigate,isEducator,backendUrl,setIsEducator,getToken}=useContext(AppContext)
 
     const {openSignIn} = useClerk()//when we click on open sign-up button this will open the form
     const {user}=useUser()
+
+    const becomeEducator = async () => {
+        try {
+            if (isEducator) {
+            navigate('/educator')
+            return;
+            }
+
+            const token = await getToken()
+            const { data } = await axios.get(
+            backendUrl + '/api/educator/update-role',
+            { headers: { Authorization: `Bearer ${token}` } }
+            )
+
+            if (data.success) {
+            setIsEducator(true)
+            toast.success(data.message)
+            }
+            else{
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            // error handling
+            toast.error(error.message)
+        }
+    }
+
 
     return (
         
@@ -26,7 +56,7 @@ function Navbar() {
                 {    
                     user &&
                     <>
-                        <button onClick={()=>navigate('/educator')}>{isEducator?'Educator Dashboard': 'Become Educator'}</button>
+                        <button onClick={becomeEducator}>{isEducator?'Educator Dashboard': 'Become Educator'}</button>
                         <Link to='/my-enrollments'> My Enrollments </Link>
                     </>
                 }
@@ -51,7 +81,7 @@ function Navbar() {
                     {    
                     user &&
                     <>
-                         <button onClick={()=>navigate('/educator')}>{isEducator?'Educator Dashboard': 'Become Educator'}</button>
+                         <button onClick={becomeEducator}>{isEducator?'Educator Dashboard': 'Become Educator'}</button>
                         <Link to='/my-enrollments'> My Enrollments </Link>
                     </>
                     }

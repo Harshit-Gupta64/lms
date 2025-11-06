@@ -15,7 +15,7 @@ function CourseCard({course}) {
                 <h3 className='text-base font-semibold'>
                     {course.courseTitle}
                 </h3>
-                <p className='text-gray-500'>Harshit Gupta</p>
+                <p className='text-gray-500'>{course.educator.name}</p>
                 <div className='flex items-center space-x-2'>
                     {/* from appContext */}
                     <p>{calculateRating(course)}</p>

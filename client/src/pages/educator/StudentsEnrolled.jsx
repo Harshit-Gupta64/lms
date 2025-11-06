@@ -2,20 +2,41 @@ import React, { useContext, useEffect, useState } from 'react'
 import { AppContext } from '../../context/AppContext'
 import Loading from '../../components/student/Loading'
 import { assets, dummyStudentEnrolled } from '../../assets/assets'
+import { toast } from 'react-toastify'
+import axios from 'axios'
 
 function StudentsEnrolled() {
+
+  const {backendUrl, getToken, isEducator} = useContext(AppContext)
   // state for enrolled students
   const [enrolledStudents, setEnrolledStudents] = useState(null)
 
   // fetching enrolled students (dummy for now)
-  const fetchEnrolledStudents = async () => {
-    setEnrolledStudents(dummyStudentEnrolled)
+const fetchEnrolledStudents = async () => {
+  try {
+      const token = await getToken()
+      const { data } = await axios.get(
+          backendUrl + '/api/educator/student-enrolled', 
+          { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      if (data.success) {
+          setEnrolledStudents(data.enrolledStudents.reverse())
+      } else {
+          toast.error(data.message)
+      }
+  } catch (error) {
+      toast.error(error.message)
   }
+}
+
 
   // run once on mount
   useEffect(() => {
-    fetchEnrolledStudents()
-  }, [])
+    if (isEducator) {
+      fetchEnrolledStudents()
+    }
+  }, [isEducator])
 
   // render UI if data exists, else loading
   return enrolledStudents ? (

@@ -6,13 +6,10 @@ function MyCourses() {
   const { currency, allCourses } = useContext(AppContext)
   const [courses, setCourses] = useState(null)
 
-  const fetchEducatorCourses = async () => {
-    setCourses(allCourses)
-  }
-
+  // ✅ Important fix: update whenever allCourses changes (fixes refresh issue)
   useEffect(() => {
-    fetchEducatorCourses()
-  }, [])
+    setCourses(allCourses)
+  }, [allCourses])
 
   return courses ? (
     <>
@@ -35,10 +32,11 @@ function MyCourses() {
                 <tbody className='text-sm text-gray-500'>
                   {courses.map((course) => (
                     <tr key={course._id} className='border-b border-gray-500/20 hover:bg-gray-100'>
+                      
                       {/* Course Info */}
                       <td className='md:px-4 pl-2 md:pl-4 py-3 flex items-center space-x-3 truncate'>
                         <img
-                          src={course.courseThumbnail}
+                          src={course.courseThumbnail || null}
                           alt='Course Image'
                           className='w-16 h-12 object-cover rounded-md'
                         />
@@ -51,32 +49,34 @@ function MyCourses() {
                       <td className='px-4 py-3'>
                         {currency}{' '}
                         {Math.floor(
-                          course.enrolledStudents.length *
-                            (course.coursePrice - (course.discount * course.coursePrice) / 100)
+                          (course?.enrolledStudents?.length || 0) *
+                          (course.coursePrice - (course.discount * course.coursePrice) / 100)
                         )}
                       </td>
 
                       {/* Total Students */}
                       <td className='px-4 py-3 text-center'>
-                        {course.enrolledStudents.length}
+                        {course?.enrolledStudents?.length || 0}
                       </td>
 
                       {/* Published Date */}
                       <td className='px-4 py-3'>
                         {new Date(course.createdAt).toLocaleDateString()}
                       </td>
+
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           </div>
         </div>
       </div>
     </>
-  ) : 
+  ) : (
     <Loading />
-  
+  )
 }
 
 export default MyCourses
