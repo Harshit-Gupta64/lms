@@ -16,8 +16,30 @@ const app = express()
 await connectDB()
 await connectCloudinary()
 
+// Allow both localhost (Vite) and your deployed frontend
+const allowlist = [
+  'http://localhost:5173',                                  // Vite dev
+  'https://lms-frontend-black-kappa.vercel.app'             // Prod
+];
+
+// Optional: allow any Vercel preview like https://something.vercel.app
+const vercelPreview = /\.vercel\.app$/;
+
+app.use(cors({
+  origin(origin, cb) {
+    if (!origin) return cb(null, true); // non-browser or same-origin
+    const ok =
+      allowlist.includes(origin) ||
+      vercelPreview.test(origin);
+    return ok ? cb(null, true) : cb(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization','Accept','X-Requested-With']
+}));
+
+
 // Middlewares
-app.use(cors())
 app.use(clerkMiddleware())
 
 // Routes
